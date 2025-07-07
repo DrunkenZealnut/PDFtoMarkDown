@@ -3,3 +3,327 @@ description:
 globs:
 alwaysApply: false
 ---
+# CLI 인터페이스 및 사용자 경험 가이드라인
+
+## CLI 인터페이스 설계 원칙
+
+### 1. 명령어 구조
+```bash
+# 기본 사용법
+python main.py [OPTIONS] INPUT_FILE [OUTPUT_FILE]
+
+# 예시
+python main.py document.pdf                    # 기본 변환
+python main.py document.pdf output.md          # 출력 파일 지정
+python main.py *.pdf --batch                   # 일괄 처리
+python main.py document.pdf --extract-images   # 이미지 추출 포함
+```
+
+### 2. 옵션 설계 (Click 라이브러리 사용)
+```python
+import click
+from pathlib import Path
+
+@click.command()
+@click.argument('input_file', type=click.Path(exists=True, path_type=Path))
+@click.argument('output_file', required=False, type=click.Path(path_type=Path))
+@click.option('--extract-images', '-i', is_flag=True, 
+              help='PDF에서 이미지를 추출하여 저장합니다')
+@click.option('--output-dir', '-o', type=click.Path(path_type=Path),
+              help='출력 디렉토리를 지정합니다')
+@click.option('--batch', '-b', is_flag=True,
+              help='여러 파일을 일괄 처리합니다')
+@click.option('--config', '-c', type=click.Path(exists=True, path_type=Path),
+              help='설정 파일 경로를 지정합니다')
+@click.option('--verbose', '-v', count=True,
+              help='상세 로그 출력 (-v, -vv, -vvv)')
+@click.option('--quiet', '-q', is_flag=True,
+              help='최소한의 출력만 표시합니다')
+def main(input_file, output_file, extract_images, output_dir, 
+         batch, config, verbose, quiet):
+    """PDF 파일을 Markdown 형식으로 변환합니다.
+    
+    INPUT_FILE: 변환할 PDF 파일 경로
+    OUTPUT_FILE: 출력할 Markdown 파일 경로 (선택사항)
+    """
+    pass
+```
+
+### 3. 도움말 및 사용법
+```python
+# 명령어별 상세 도움말
+@click.group()
+def cli():
+    """PDF to Markdown 변환 도구"""
+    pass
+
+@cli.command()
+@click.pass_context
+def convert(ctx):
+    """PDF 파일을 Markdown으로 변환합니다."""
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+@cli.command()
+def examples():
+    """사용 예시를 표시합니다."""
+    examples_text = """
+    사용 예시:
+    
+    1. 기본 변환:
+       python main.py document.pdf
+    
+    2. 출력 파일 지정:
+       python main.py document.pdf output.md
+    
+    3. 이미지 추출 포함:
+       python main.py document.pdf --extract-images
+    
+    4. 일괄 처리:
+       python main.py *.pdf --batch --output-dir ./output
+    
+    5. 상세 로그와 함께:
+       python main.py document.pdf -vv
+    """
+    click.echo(examples_text)
+```
+
+## 진행 상황 표시 및 피드백
+
+### 1. 진행률 표시 (tqdm 사용)
+```python
+from tqdm import tqdm
+import time
+
+def process_pdf_with_progress(pdf_path: Path) -> str:
+    """진행률을 표시하면서 PDF를 처리합니다."""
+    with pdf_document(pdf_path) as doc:
+        total_pages = doc.page_count
+        
+        with tqdm(total=total_pages, desc="페이지 처리") as pbar:
+            markdown_content = []
+            
+            for page_num in range(total_pages):
+                # 페이지 처리
+                page_content = process_single_page(doc[page_num])
+                markdown_content.append(page_content)
+                
+                # 진행률 업데이트
+                pbar.set_postfix({
+                    'page': f'{page_num + 1}/{total_pages}',
+                    'size': f'{len(page_content)} chars'
+                })
+                pbar.update(1)
+                
+            return '\n\n'.join(markdown_content)
+```
+
+### 2. 실시간 상태 메시지
+```python
+import sys
+
+class StatusReporter:
+    """실시간 상태 업데이트를 위한 클래스"""
+    
+    def __init__(self, quiet: bool = False):
+        self.quiet = quiet
+        self.current_status = ""
+    
+    def update_status(self, message: str, level: str = "info"):
+        """상태 메시지를 업데이트합니다."""
+        if self.quiet:
+            return
+            
+        # 이전 메시지 지우기
+        if self.current_status:
+            sys.stdout.write('\r' + ' ' * len(self.current_status) + '\r')
+        
+        # 새 메시지 출력
+        prefix = {
+            "info": "ℹ️ ",
+            "warning": "⚠️ ", 
+            "error": "❌ ",
+            "success": "✅ "
+        }.get(level, "")
+        
+        full_message = f"{prefix}{message}"
+        sys.stdout.write(full_message)
+        sys.stdout.flush()
+        self.current_status = full_message
+    
+    def finish_status(self, final_message: str = "완료"):
+        """상태 업데이트를 완료합니다."""
+        if not self.quiet:
+            sys.stdout.write(f'\r✅ {final_message}\n')
+        self.current_status = ""
+```
+
+## 설정 파일 및 환경 설정
+
+### 1. 설정 파일 형식 (YAML)
+```yaml
+# config.yaml
+conversion:
+  title_font_threshold: 1.2
+  extract_images: true
+  preserve_formatting: true
+  merge_paragraphs: false
+  table_detection: true
+
+output:
+  encoding: 'utf-8'
+  line_ending: '\n'
+  indent_size: 2
+  image_format: 'png'
+
+processing:
+  max_memory_mb: 512
+  parallel_pages: false
+  cache_size: 128
+
+logging:
+  level: 'INFO'
+  file: null
+  format: '%(asctime)s - %(levelname)s - %(message)s'
+```
+
+### 2. 설정 로드 및 검증
+```python
+import yaml
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class ConversionConfig:
+    title_font_threshold: float = 1.2
+    extract_images: bool = True
+    preserve_formatting: bool = True
+    merge_paragraphs: bool = False
+    table_detection: bool = True
+
+@dataclass
+class OutputConfig:
+    encoding: str = 'utf-8'
+    line_ending: str = '\n'
+    indent_size: int = 2
+    image_format: str = 'png'
+
+@dataclass
+class AppConfig:
+    conversion: ConversionConfig
+    output: OutputConfig
+    
+    @classmethod
+    def load_from_file(cls, config_path: Path) -> 'AppConfig':
+        """YAML 파일에서 설정을 로드합니다."""
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+        
+        return cls(
+            conversion=ConversionConfig(**data.get('conversion', {})),
+            output=OutputConfig(**data.get('output', {}))
+        )
+```
+
+## 에러 메시지 및 사용자 피드백
+
+### 1. 친화적인 에러 메시지
+```python
+def handle_common_errors(func):
+    """일반적인 에러를 사용자 친화적으로 처리하는 데코레이터"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError as e:
+            click.echo(f"❌ 파일을 찾을 수 없습니다: {e.filename}", err=True)
+            click.echo("💡 파일 경로를 확인해주세요.", err=True)
+            sys.exit(1)
+        except PermissionError as e:
+            click.echo(f"❌ 파일 접근 권한이 없습니다: {e.filename}", err=True)
+            click.echo("💡 파일이 다른 프로그램에서 사용 중인지 확인해주세요.", err=True)
+            sys.exit(1)
+        except UnsupportedFormatError as e:
+            click.echo(f"❌ 지원하지 않는 PDF 형식입니다: {e}", err=True)
+            click.echo("💡 다른 PDF 파일로 시도해보거나 파일이 손상되지 않았는지 확인해주세요.", err=True)
+            sys.exit(1)
+        except Exception as e:
+            click.echo(f"❌ 예상치 못한 오류가 발생했습니다: {e}", err=True)
+            click.echo("💡 --verbose 옵션으로 상세 로그를 확인하거나 이슈를 신고해주세요.", err=True)
+            sys.exit(1)
+    return wrapper
+```
+
+### 2. 검증 및 경고 메시지
+```python
+def validate_input_file(pdf_path: Path) -> bool:
+    """입력 파일을 검증하고 경고를 표시합니다."""
+    # 파일 크기 확인
+    file_size_mb = pdf_path.stat().st_size / (1024 * 1024)
+    if file_size_mb > 100:
+        click.echo(f"⚠️  큰 파일입니다 ({file_size_mb:.1f}MB). 처리 시간이 오래 걸릴 수 있습니다.")
+        if not click.confirm("계속 진행하시겠습니까?"):
+            return False
+    
+    # PDF 유효성 확인
+    try:
+        with fitz.open(str(pdf_path)) as doc:
+            if doc.page_count == 0:
+                click.echo("❌ 빈 PDF 파일입니다.", err=True)
+                return False
+            elif doc.page_count > 500:
+                click.echo(f"⚠️  매우 긴 문서입니다 ({doc.page_count} 페이지).")
+                
+    except Exception as e:
+        click.echo(f"❌ PDF 파일 검증 실패: {e}", err=True)
+        return False
+    
+    return True
+```
+
+## 출력 형식 및 결과 요약
+
+### 1. 변환 완료 메시지
+```python
+def show_conversion_summary(
+    input_path: Path, 
+    output_path: Path, 
+    stats: Dict[str, Any]
+):
+    """변환 완료 후 요약 정보를 표시합니다."""
+    click.echo("\n" + "="*50)
+    click.echo("✅ PDF to Markdown 변환 완료!")
+    click.echo("="*50)
+    click.echo(f"📄 입력 파일: {input_path}")
+    click.echo(f"📝 출력 파일: {output_path}")
+    click.echo(f"📊 처리 통계:")
+    click.echo(f"   • 총 페이지: {stats['total_pages']}")
+    click.echo(f"   • 추출된 텍스트: {stats['text_length']:,} 문자")
+    click.echo(f"   • 발견된 제목: {stats['headings_count']}개")
+    click.echo(f"   • 추출된 이미지: {stats['images_count']}개")
+    click.echo(f"   • 처리 시간: {stats['processing_time']:.2f}초")
+    
+    if stats['warnings']:
+        click.echo(f"\n⚠️  경고 사항:")
+        for warning in stats['warnings']:
+            click.echo(f"   • {warning}")
+```
+
+### 2. 디버그 모드 출력
+```python
+def setup_debug_logging(verbose_level: int):
+    """상세 로그 레벨에 따른 디버그 설정"""
+    if verbose_level == 1:
+        logging.getLogger().setLevel(logging.INFO)
+        click.echo("ℹ️  상세 로그 모드 활성화")
+    elif verbose_level == 2:
+        logging.getLogger().setLevel(logging.DEBUG)
+        click.echo("🔍 디버그 모드 활성화")
+    elif verbose_level >= 3:
+        logging.getLogger().setLevel(logging.DEBUG)
+        # 외부 라이브러리 로그도 활성화
+        logging.getLogger('fitz').setLevel(logging.DEBUG)
+        click.echo("🔬 전체 디버그 모드 활성화")
+```
+
+## 참조 파일들
+CLI 인터페이스는 [main.py](mdc:main.py)에서 구현하며, 설정 관리는 [config.py](mdc:config.py)에서 담당합니다. 사용자 인터페이스 관련 유틸리티는 [utils.py](mdc:utils.py)에서 관리합니다.

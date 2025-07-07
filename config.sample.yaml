@@ -1,0 +1,55 @@
+# PDF to Markdown 변환기 설정 파일
+# 이 파일을 config.yaml로 복사하여 사용하세요.
+
+# 변환 관련 설정
+conversion:
+  # 제목 인식을 위한 폰트 크기 임계값 (본문 대비 배수)
+  title_font_threshold: 1.2
+  
+  # 이미지 추출 여부
+  extract_images: true
+  
+  # 원본 서식 보존 여부
+  preserve_formatting: true
+  
+  # 단락 병합 여부
+  merge_paragraphs: false
+  
+  # 테이블 자동 인식 여부
+  table_detection: true
+
+# 출력 관련 설정
+output:
+  # 출력 파일 인코딩
+  encoding: 'utf-8'
+  
+  # 줄바꿈 문자
+  line_ending: '\n'
+  
+  # 들여쓰기 크기
+  indent_size: 2
+  
+  # 이미지 저장 형식
+  image_format: 'png'
+
+# 처리 관련 설정
+processing:
+  # 최대 메모리 사용량 (MB)
+  max_memory_mb: 512
+  
+  # 페이지 병렬 처리 여부
+  parallel_pages: false
+  
+  # 캐시 크기
+  cache_size: 128
+
+# 로깅 설정
+logging:
+  # 로그 레벨 (DEBUG, INFO, WARNING, ERROR)
+  level: 'INFO'
+  
+  # 로그 파일 경로 (null이면 파일 저장 안함)
+  file: null
+  
+  # 로그 형식
+  format: '%(asctime)s - %(levelname)s - %(message)s' 

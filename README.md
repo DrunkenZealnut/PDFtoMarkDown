@@ -23,36 +23,48 @@ PDF 문서를 Markdown 형식으로 자동 변환하는 Python CLI 도구입니�
   - Click (CLI 인터페이스)
 - **개발 도구**: Black, isort, flake8, mypy, pytest
 
+## 📚 문서
+
+- [개발 계획서](개발_계획서.md) - 전체 개발 로드맵과 단계별 계획
+- [Phase 1.2 가이드](PHASE_1_2_GUIDE.md) - 의존성 라이브러리 설치 및 검증 가이드
+
 ## 📦 설치 방법
 
-### 사전 요구사항
-- Python 3.8 이상
-- pip 패키지 관리자
+### 🚨 현재 단계: Phase 1.2 - 의존성 설치 및 검증
 
-### 1. 저장소 클론
+이 프로젝트는 현재 **Phase 1.2** 단계에 있습니다. 아래 방법 중 하나를 선택하여 의존성을 설치하고 검증하세요.
+
+### 방법 1: 자동 설치 및 검증 (권장)
 ```bash
+# Python 3.8+ 설치 후 실행
+python install_and_verify.py
+```
+
+### 방법 2: 수동 설치
+```bash
+# 1. 저장소 클론
 git clone https://github.com/your-username/pdf-to-markdown.git
 cd pdf-to-markdown
-```
 
-### 2. 가상환경 생성 및 활성화
-```bash
-# Windows
+# 2. 가상환경 생성 및 활성화 (권장)
 python -m venv venv
+
+# Windows:
 venv\Scripts\activate
-
-# macOS/Linux
-python -m venv venv
+# macOS/Linux:
 source venv/bin/activate
-```
 
-### 3. 의존성 설치
-```bash
+# 3. 의존성 설치
 pip install -r requirements.txt
 
-# 개발용 (선택사항)
+# 4. 개발 도구 설치 (선택사항)
 pip install -r requirements-dev.txt
+
+# 5. 검증 실행
+python tests/test_dependencies.py
 ```
+
+**📖 상세한 설치 가이드**: [Phase 1.2 가이드](PHASE_1_2_GUIDE.md)를 참조하세요.
 
 ## 🚀 사용법
 
