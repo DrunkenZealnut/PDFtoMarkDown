@@ -1,0 +1,18 @@
+# PDF to Markdown 변환기 - 주요 의존성
+# PDF 처리 라이브러리
+pymupdf>=1.23.0
+
+# 테이블 추출 전용 라이브러리
+pdfplumber>=0.10.0
+
+# 이미지 처리
+Pillow>=10.0.0
+
+# CLI 인터페이스
+click>=8.1.0
+
+# 설정 파일 처리 (YAML)
+pyyaml>=6.0
+
+# 진행률 표시
+tqdm>=4.65.0 

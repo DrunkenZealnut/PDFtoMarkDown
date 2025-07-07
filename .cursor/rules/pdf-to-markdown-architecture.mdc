@@ -1,0 +1,78 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# PDF to Markdown 변환기 프로젝트 아키텍처 규칙
+
+## 프로젝트 구조
+```
+pdf_to_markdown/
+├── main.py              # 메인 실행 파일 - CLI 인터페이스
+├── pdf_reader.py        # PDF 파일 읽기 및 분석 모듈
+├── text_parser.py       # 텍스트 구조 분석 모듈
+├── markdown_converter.py # Markdown 변환 모듈
+├── utils.py             # 공통 유틸리티 함수
+├── config.py            # 설정 관리
+├── requirements.txt     # 의존성 관리
+├── tests/               # 테스트 파일들
+├── test_files/          # 테스트용 PDF 파일들
+└── output/              # 변환된 Markdown 파일들
+```
+
+## 핵심 아키텍처 원칙
+
+### 1. 모듈화 설계
+- 각 기능을 독립적인 모듈로 분리
+- 단일 책임 원칙 (Single Responsibility Principle) 적용
+- 느슨한 결합도와 높은 응집도 유지
+
+### 2. 클래스 구조
+- **PDFReader**: PDF 파일 읽기, 페이지 추출, 메타데이터 획득
+- **TextParser**: 텍스트 구조 분석, 제목/본문/리스트 분류
+- **MarkdownConverter**: 구조화된 데이터를 Markdown으로 변환
+- **FileManager**: 파일 입출력 관리
+
+### 3. 데이터 플로우
+```
+PDF 파일 → PDFReader → 원시 텍스트/이미지
+원시 데이터 → TextParser → 구조화된 문서 객체
+구조화된 객체 → MarkdownConverter → Markdown 텍스트
+Markdown 텍스트 → FileManager → .md 파일 저장
+```
+
+## 기술 스택 및 라이브러리
+
+### 필수 라이브러리
+- `pymupdf` (fitz): PDF 처리 메인 라이브러리
+- `pdfplumber`: 테이블 추출 전용
+- `Pillow`: 이미지 처리
+- `click`: CLI 인터페이스 구축
+
+### 선택적 라이브러리
+- `python-magic`: 파일 타입 검증
+- `tqdm`: 진행률 표시
+- `logging`: 로그 관리
+- `pytest`: 테스트 프레임워크
+
+## 개발 가이드라인
+
+### 코드 작성 원칙
+1. 타입 힌트 필수 사용 (Python 3.8+)
+2. Docstring 작성 (Google 스타일)
+3. 에러 처리는 명시적으로 구현
+4. 설정값은 config.py에서 중앙 관리
+5. 모든 함수와 클래스는 단위 테스트 작성
+
+### 네이밍 컨벤션
+- 클래스명: PascalCase (예: PDFReader)
+- 함수/변수명: snake_case (예: extract_text)
+- 상수명: UPPER_SNAKE_CASE (예: DEFAULT_FONT_SIZE)
+- 파일명: snake_case (예: pdf_reader.py)
+
+### 파일 조직화
+- 각 모듈은 명확한 역할을 가져야 함
+- 순환 의존성 금지
+- 공통 기능은 utils.py에 배치
+- 설정값은 config.py에서 관리
+
