@@ -164,9 +164,13 @@ class MarkdownConfig:
                 if not attr_name.startswith('_'):
                     attr_value = getattr(section_obj, attr_name)
                     if not callable(attr_value):
-                        if isinstance(attr_value, Enum):
-                            section_dict[attr_name] = attr_value.value
-                        else:
+                        # Enum 타입 체크를 더 안전하게 처리
+                        try:
+                            if hasattr(attr_value, 'value'):
+                                section_dict[attr_name] = attr_value.value
+                            else:
+                                section_dict[attr_name] = attr_value
+                        except AttributeError:
                             section_dict[attr_name] = attr_value
             
             result[field_name] = section_dict

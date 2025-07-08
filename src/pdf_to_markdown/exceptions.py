@@ -21,6 +21,17 @@ class PDFProcessingError(Exception):
         return f"PDF 처리 오류: {self.message}"
 
 
+class ConfigurationError(Exception):
+    """설정 관련 오류"""
+    
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+    
+    def __str__(self):
+        return f"설정 오류: {self.message}"
+
+
 class FileNotFoundError(PDFProcessingError):
     """PDF 파일을 찾을 수 없는 경우"""
     

@@ -1,0 +1,48 @@
+# PDF to Markdown 변환기 설정 파일
+# 각 섹션별로 변환 옵션을 설정할 수 있습니다
+
+# 변환 관련 설정
+conversion:
+  title_font_threshold: 1.2  # 제목 인식을 위한 폰트 크기 임계값
+  extract_images: true       # 이미지 추출 여부
+  preserve_formatting: true  # 원본 형식 보존
+  merge_paragraphs: false    # 단락 병합 여부
+  table_detection: true      # 테이블 감지 여부
+  min_confidence: 0.5        # 최소 신뢰도
+  skip_empty_pages: true     # 빈 페이지 건너뛰기
+
+# 출력 관련 설정
+output:
+  encoding: utf-8            # 파일 인코딩
+  line_ending: '\n'          # 줄바꿈 문자
+  indent_size: 2             # 들여쓰기 크기
+  image_format: png          # 이미지 형식
+  create_output_dir: true    # 출력 디렉토리 생성
+  backup_existing: false     # 기존 파일 백업
+
+# 로깅 설정
+logging:
+  level: INFO                # 로그 레벨 (DEBUG, INFO, WARNING, ERROR)
+  console_output: true       # 콘솔 출력 여부
+  file_path: null            # 로그 파일 경로 (null이면 파일 저장 안함)
+
+# Markdown 생성 세부 설정
+markdown:
+  heading:
+    max_level: 6
+    add_toc: false
+  paragraph:
+    max_line_length: 80
+    preserve_line_breaks: false
+  list:
+    bullet_marker: '-'
+    indent_size: 2
+  table:
+    format_type: standard
+    align_columns: true
+  image:
+    extract_images: true
+    image_directory: images
+  output:
+    encoding: utf-8
+    add_final_newline: true

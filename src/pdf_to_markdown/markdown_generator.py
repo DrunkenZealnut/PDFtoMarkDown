@@ -507,12 +507,18 @@ class MarkdownGenerator:
         text = re.sub(pattern, replacement, text)
         
         # 줄바꿈 타입 적용
-        if self.config.output.line_ending != LineEndingType.LF:
-            text = text.replace('\n', self.config.output.line_ending.value)
+        line_ending = self.config.output.line_ending
+        if hasattr(line_ending, 'value'):
+            line_ending_str = line_ending.value
+        else:
+            line_ending_str = str(line_ending)
+            
+        if line_ending_str != '\n':
+            text = text.replace('\n', line_ending_str)
         
         # 파일 끝 빈 줄
         if self.config.output.add_final_newline and not text.endswith('\n'):
-            text += self.config.output.line_ending.value
+            text += line_ending_str
         
         return text
     
