@@ -1,0 +1,67 @@
+# 코드 품질 자동 관리를 위한 pre-commit 설정
+repos:
+  # 기본 파일 체크
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        description: 줄 끝 공백 제거
+      - id: end-of-file-fixer
+        description: 파일 끝 개행 추가
+      - id: check-yaml
+        description: YAML 파일 검증
+      - id: check-added-large-files
+        description: 대용량 파일 체크
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+        description: 병합 충돌 마커 체크
+      - id: check-case-conflict
+        description: 파일명 대소문자 충돌 체크
+
+  # Python 코드 포맷팅
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        description: Python 코드 포맷팅
+        language_version: python3
+        args: [--line-length=88]
+
+  # Import 정렬
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        description: Import 구문 정렬
+        args: [--profile=black, --line-length=88]
+
+  # 코드 린팅
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        description: Python 코드 린팅
+        additional_dependencies: [flake8-docstrings]
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+
+  # 타입 체크
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        description: Python 타입 체크
+        additional_dependencies: [types-PyYAML, types-tqdm, types-Pillow]
+        args: [--ignore-missing-imports]
+
+  # Security 체크
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        description: Python 보안 취약점 체크
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+# Pre-commit 설정
+default_stages: [commit]
+fail_fast: false 

@@ -1,21 +1,13 @@
-# PDF to Markdown 변환기 - 개발 도구
-# 코드 포맷터
-black>=23.7.0
-
-# import 정렬
+# 개발용 의존성 - 코드 품질 도구
+black>=23.0.0
 isort>=5.12.0
-
-# 코드 린터
 flake8>=6.0.0
-
-# 타입 체커
-mypy>=1.5.1
-
-# 테스트 프레임워크
+mypy>=1.5.0
 pytest>=7.4.0
-
-# 테스트 커버리지 측정
 pytest-cov>=4.1.0
+pre-commit>=3.3.0
 
-# Git 훅 관리
-pre-commit>=3.3.0 
+# 타입 스텁
+types-PyYAML>=6.0.0
+types-tqdm>=4.65.0
+types-Pillow>=10.0.0 
